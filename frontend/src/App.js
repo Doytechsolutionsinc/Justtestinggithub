@@ -1,79 +1,67 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Chat from './components/Chat';
+import React, { useState } from "react";
 
-const API_URL = "https://metrotex-backend.onrender.com"; // Replace with your Render backend URL
-
-fetch(`${process.env.REACT_APP_API_URL}/`, {
 function App() {
-  const [messages, setMessages] = useState([
-    { text: "Hello! I am MetroTex, your smart assistant.", side: "left" }
-  ]);
-  const [input, setInput] = useState("");
-  const scrollRef = useRef(null);
+  const [userMessage, setUserMessage] = useState("");
+  const [botReply, setBotReply] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const handleSend = async () => {
+    if (!userMessage.trim()) return; // Don't send empty messages
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    const userMessage = { text: input, side: "right" };
-    setMessages(prev => [...prev, userMessage]);
-    setInput("");
-
-    const botMessage = { text: "Typing...", side: "left" };
-    setMessages(prev => [...prev, botMessage]);
+    setLoading(true);
+    setBotReply("");
 
     try {
-      const res = await fetch(API_URL, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: userMessage }),
       });
-      const data = await res.json();
-      setMessages(prev => {
-        // Remove the "Typing..." message and add the real reply
-        const newMessages = prev.slice(0, -1);
-        return [...newMessages, { text: data.reply, side: "left" }];
-      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setBotReply(data.reply);
     } catch (error) {
-      setMessages(prev => {
-        const newMessages = prev.slice(0, -1);
-        return [...newMessages, { text: "Sorry, I couldn't reach the server.", side: "left" }];
-      });
+      console.error("Error:", error);
+      setBotReply("Sorry, I couldn't connect to the server.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+    if (e.key === "Enter") {
+      handleSend();
     }
   };
 
   return (
-    <div className="app-container">
-      <header>
-        <img src="/logo.png" alt="MetroTex Logo" className="logo" />
-        <h1>MetroTex</h1>
-      </header>
+    <div style={{ maxWidth: 600, margin: "40px auto", fontFamily: "Arial, sans-serif" }}>
+      <h1>MetroTex Chat</h1>
+      <input
+        type="text"
+        value={userMessage}
+        onChange={(e) => setUserMessage(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="Type your message here"
+        style={{ width: "100%", padding: 10, fontSize: 16 }}
+      />
+      <button
+        onClick={handleSend}
+        disabled={loading}
+        style={{ marginTop: 10, padding: "10px 20px", fontSize: 16 }}
+      >
+        {loading ? "Sending..." : "Send"}
+      </button>
 
-      <div className="chat-window">
-        {messages.map((msg, i) => (
-          <Chat key={i} text={msg.text} side={msg.side} />
-        ))}
-        <div ref={scrollRef} />
-      </div>
-
-      <div className="input-area">
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type your message..."
-          rows={1}
-        />
-        <button onClick={sendMessage}>Send</button>
+      <div style={{ marginTop: 30, minHeight: 100, backgroundColor: "#f7f7f7", padding: 20, borderRadius: 6 }}>
+        <strong>Reply:</strong>
+        <p>{botReply}</p>
       </div>
     </div>
   );
