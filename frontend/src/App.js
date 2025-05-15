@@ -3,6 +3,7 @@ import Chat from './components/Chat';
 
 const API_URL = "https://metrotex-backend.onrender.com"; // Replace with your Render backend URL
 
+fetch(`${process.env.REACT_APP_API_URL}/`, {
 function App() {
   const [messages, setMessages] = useState([
     { text: "Hello! I am MetroTex, your smart assistant.", side: "left" }
