@@ -53,7 +53,7 @@ function App() {
   return (
     <div className="app-container">
       <header>
-        <img src="/logo192.png" alt="MetroTex Logo" className="logo" />
+        <img src="/logo.png" alt="MetroTex Logo" className="logo" />
         <h1>MetroTex</h1>
       </header>
 
