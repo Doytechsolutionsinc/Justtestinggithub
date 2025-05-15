@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Chat from './components/Chat';
 
-const API_URL = "https://your-backend-url.onrender.com/chat/"; // Replace with your Render backend URL
+const API_URL = "https://metrotex-backend.onrender.com"; // Replace with your Render backend URL
 
 function App() {
   const [messages, setMessages] = useState([
