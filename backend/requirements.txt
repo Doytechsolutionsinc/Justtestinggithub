@@ -4,4 +4,4 @@ uvicorn
 requests
 python-multipart
 flask_cors
-open ai
+openai
